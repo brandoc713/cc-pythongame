@@ -4,21 +4,34 @@ import pygame
 pygame.init()
 
 # Constants
+
+# Step 1: Make a bottom_panel constant
+bottom_panel = 200
+
 WHITE = (255, 255, 255)
 SCREEN_WIDTH = 1440
 SCREEN_HEIGHT = 700
+
+# Creating player image
+wizardImage = pygame.image.load("wizardplayerRight.png")
 
 # Screen dimensions
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Hello World!')
 
 # Background
-# Step 1: Set up the two different backgrounds main_background & battle_background
 main_background = pygame.image.load('coluseumBackground.png').convert_alpha()
 main_background = pygame.transform.scale(main_background, (SCREEN_WIDTH, SCREEN_HEIGHT))  # Scale the background image
 
 battle_background = pygame.image.load('battlebackground.jpeg').convert_alpha()
 battle_background = pygame.transform.scale(battle_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+# Step 2: Load wooden panel image + function for drawing the panel
+panel_img = pygame.image.load('wooden_panel.png').convert_alpha()
+panel_img = pygame.transform.scale(panel_img, (1440, bottom_panel))
+
+def drawPanel():
+    screen.blit(panel_img, (0, SCREEN_HEIGHT - bottom_panel))
 
 # Player movement variables 
 player_x = 0
@@ -43,43 +56,38 @@ def check_input(key, value):
 # Class - objects
 class Player:
   # Define a function that initalizes a "Player" object
-    def __init__(self, x, y, image_path, scale_factor, health_value):
+    def __init__(self, x, y, image_path, scale_factor):
         self.image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(self.image,(int(self.image.get_width() * scale_factor), int(self.image.get_height() * scale_factor)))
+        # Scale the image to the desired size
+        self.image = pygame.transform.scale(self.image, (1000, 400))
         self.rect = self.image.get_rect(center=(x, y))
-        self.health_value = health_value
-
-        # Step 4: Manually adjust rect size to fit visible sprite
         self.rect.width = int(self.rect.width * 0.7)  # Adjust width
         self.rect.height = int(self.rect.height * 0.7)  # Adjust height
-        self.rect = self.rect.inflate(-self.rect.width * 0.8, -self.rect.height * 0.3)
+        self.rect = self.rect.inflate(-self.rect.width * 1.75, -self.rect.height * 0.3)
         
 
     # Copying player image onto rectangle
     def draw(self, screen, directionImg):
         self.image = directionImg
-        screen.blit(self.image, self.rect.topleft)
+        screen.blit(self.image, self.rect)
 
     # Updating player position
     def update(self):
-        #Step 3: Separate Movement Update & Collision Detection:
         new_rect = self.rect.move(player_velocity[0] * player_speed, player_velocity[1] * player_speed)
         return new_rect
     
-
 class Enemy:
     def __init__(self, x, y, image_path, scale_factor):
         self.image = pygame.image.load(image_path)
         self.image = pygame.transform.scale(self.image,(int(self.image.get_width() * scale_factor), int(self.image.get_height() * scale_factor)))
         self.rect = self.image.get_rect(center=(x, y))
         
-        # Manually adjust rect size to fit visible sprite better
         self.rect.width = int(self.rect.width * 0.7)  # Adjust width
         self.rect.height = int(self.rect.height * 0.7)  # Adjust height
-        self.rect = self.rect.inflate(-self.rect.width * 0.8, -self.rect.height * 0.3)
+        self.rect = self.rect.inflate(-self.rect.width * 1.01, -self.rect.height * 0.3)
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect.topleft)
+        screen.blit(self.image, self.rect)
 
 class Heart:
   # Define a function that initalizes a "Heart" object
@@ -93,21 +101,29 @@ class Heart:
   def draw(self, screen):
       screen.blit(self.image, self.rect.topleft)
 
+# Step 3: Create new classes for battle portion of game
+class BattlePlayer:
+    def __init__(self, x, y, att_val, def_val, hp_val):
+        self.att_val = att_val
+        self.def_val = def_val
+        self.hp_val = hp_val
+        self.alive = True
+        self.image = pygame.transform.scale(wizardImage, (600,300))
+        self.rect = self.image.get_rect() #Note: Rect is a hidden property which takes width and height of picture and position it on screen
+        self.rect.center = (x,y) # Position rectangle @ (x,y) coordinate
 
-# Creating player image
-image = pygame.image.load("wizardplayerRight.png")
+    def draw(self): # Note: Whenever creating methods within a class you need to include "self" in the parameter as a minimum
+        screen.blit(self.image, self.rect)
 
-# Centering player
-surf_center = (
-    SCREEN_WIDTH - image.get_width() / 2,
-    SCREEN_HEIGHT - image.get_height() / 2
-)
 
-# Creating the player object
-wizardPlayer = Player(500, 557, 'wizardplayerRight.png', 1.75, 5)
 
-# Creating enemy goblin
-goblinEnemy = Enemy(1000, 475, 'Goblin.png', 1.5)
+
+# Creating the "player" and "goblin" for the initial interaction.
+wizardPlayer = Player(150, 500, 'wizardplayerRight.png', 1.75)
+goblinEnemy = Enemy(1000, 375, 'Goblin.png', 2)
+
+# Step 4: Create the "battlePlayer" and "battleEnemy" for battle sequence
+battleWizard = BattlePlayer(250, SCREEN_HEIGHT - bottom_panel - 85, 1, 1, 15)
 
 # Creating heart
 heart5 = Heart(225, 40, 'hearts5.png', 0.75)
@@ -141,7 +157,7 @@ while running:
         player_velocity[0] = player_input["right"] - player_input["left"]
         player_velocity[1] = player_input["down"] - player_input["up"]
 
-    #Step 2: Scene Management:
+    #Scene Management:
     if scene == "main":
         # Update player position
         new_rect = wizardPlayer.update()
@@ -160,6 +176,12 @@ while running:
     elif scene == "battle":
         # Draw battle scene
         screen.blit(battle_background, (0,0))
+
+        # Draw the wooden panel at the bottom
+        drawPanel()
+
+        # Draw the scaled enemies
+        battleWizard.draw()
 
     pygame.display.flip()
     clock.tick(60)
