@@ -14,6 +14,7 @@ SCREEN_HEIGHT = 700
 
 # Creating player image
 wizardImage = pygame.image.load("wizardplayerRight.png")
+goblinImage = pygame.image.load('Goblin.png')
 
 # Screen dimensions
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -115,8 +116,17 @@ class BattlePlayer:
     def draw(self): # Note: Whenever creating methods within a class you need to include "self" in the parameter as a minimum
         screen.blit(self.image, self.rect)
 
-
-
+class BattleEnemy:
+    def __init__(self, x, y, att_val, hp_val, imagePath):
+        self.att_val = att_val
+        self.hp_val = hp_val
+        self.image = imagePath
+        self.image = pygame.transform.scale(self.image, (500,700))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x,y)
+    
+    def draw(self):
+        screen.blit(self.image, self.rect)
 
 # Creating the "player" and "goblin" for the initial interaction.
 wizardPlayer = Player(150, 500, 'wizardplayerRight.png', 1.75)
@@ -124,15 +134,17 @@ goblinEnemy = Enemy(1000, 375, 'Goblin.png', 2)
 
 # Step 4: Create the "battlePlayer" and "battleEnemy" for battle sequence
 battleWizard = BattlePlayer(250, SCREEN_HEIGHT - bottom_panel - 85, 1, 1, 15)
+battleGoblin = BattleEnemy(1150, (SCREEN_HEIGHT - bottom_panel - 135), 5, 10, goblinImage)
 
-# Creating heart
+# Creating heart Note(5/21): Commenting these out first maybe turn this into a loop when in the battle screen?
+'''
 heart5 = Heart(225, 40, 'hearts5.png', 0.75)
 heart4 = Heart(225, 40, 'hearts4.png', 0.75)
 heart3 = Heart(225, 40, 'hearts3.png', 0.75)
 heart2 = Heart(225, 40, 'hearts2.png', 0.75)
 heart1 = Heart(225, 40, 'hearts1.png', 0.75)
 heart0 = Heart(225, 40, 'hearts0.png', 0.75)
-
+'''
 # Start of game loop
 clock = pygame.time.Clock()
 running = True
@@ -182,6 +194,7 @@ while running:
 
         # Draw the scaled enemies
         battleWizard.draw()
+        battleGoblin.draw()
 
     pygame.display.flip()
     clock.tick(60)
