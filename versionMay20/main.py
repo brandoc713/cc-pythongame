@@ -20,7 +20,9 @@ goblinImage = pygame.image.load('Goblin.png')
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Hello World!')
 
-# Background
+# Backgrounds
+start_background = pygame.image.load('TitleScreen.png').convert_alpha()
+
 main_background = pygame.image.load('coluseumBackground.png').convert_alpha()
 main_background = pygame.transform.scale(main_background, (SCREEN_WIDTH, SCREEN_HEIGHT))  # Scale the background image
 
@@ -128,6 +130,12 @@ class BattleEnemy:
     def draw(self):
         screen.blit(self.image, self.rect)
 
+class Button():
+    def __init__(self, x, y, image, scale):
+        width = image.get_width()
+        height = image.get_height()
+        self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
+
 # Creating the "player" and "goblin" for the initial interaction.
 wizardPlayer = Player(150, 500, 'wizardplayerRight.png', 1.75)
 goblinEnemy = Enemy(1000, 375, 'Goblin.png', 2)
@@ -145,11 +153,12 @@ heart2 = Heart(225, 40, 'hearts2.png', 0.75)
 heart1 = Heart(225, 40, 'hearts1.png', 0.75)
 heart0 = Heart(225, 40, 'hearts0.png', 0.75)
 '''
+
 # Start of game loop
 clock = pygame.time.Clock()
 running = True
 playerDirection = pygame.image.load("wizardplayerRight.png")
-scene = "main" #Initialize the scene
+scene = "startScreen" #Initialize the scene
 
 while running:
     #Start of the game for when the player loads in
@@ -170,6 +179,10 @@ while running:
         player_velocity[1] = player_input["down"] - player_input["up"]
 
     #Scene Management:
+    if scene == "startScreen":
+        #Load Title Screen
+        screen.blit(start_background, (0,0))
+
     if scene == "main":
         # Update player position
         new_rect = wizardPlayer.update()
