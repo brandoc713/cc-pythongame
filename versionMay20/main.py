@@ -131,10 +131,49 @@ class BattleEnemy:
         screen.blit(self.image, self.rect)
 
 class Button():
-    def __init__(self, x, y, image, scale):
-        width = image.get_width()
-        height = image.get_height()
-        self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
+    def __init__(self, x, y, image_path, scale):
+        # Load the image using pygame.image.load()
+        self.image = pygame.image.load(image_path)
+        
+        # Get the size of the image and apply the scaling
+        width = self.image.get_width()
+        height = self.image.get_height()
+        self.image = pygame.transform.scale(self.image, (int(width * scale), int(height * scale)))
+
+        # Set the rect attributes for positioning
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+        print(f"Button initialized at position: {self.rect.topleft} with size: {self.rect.size}")
+
+        self.clicked = False
+
+    def draw(self, surface):
+        #Draw Button on screen
+        surface.blit(self.image, (600, 350))
+
+    def utility(self):
+        action = False
+        #Get mouse position
+        pos = pygame.mouse.get_pos()
+        #print(f"Mouse position: {pos}")
+
+        #Check mouseover and clicked conditions
+        if self.rect.collidepoint(pos):
+            #print("Mouse is over the button")
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                self.clicked = True
+                action = True
+                #print("Clicked")
+        
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+        
+        return action
+
+
+# Creating buttons needed through game
+start_button = Button(600, 350, 'startButton.png', 0.5)
 
 # Creating the "player" and "goblin" for the initial interaction.
 wizardPlayer = Player(150, 500, 'wizardplayerRight.png', 1.75)
@@ -180,8 +219,12 @@ while running:
 
     #Scene Management:
     if scene == "startScreen":
+        start_button_clicked = start_button.utility()
         #Load Title Screen
         screen.blit(start_background, (0,0))
+        start_button.draw(screen)
+        if start_button_clicked:
+            scene = "main"
 
     if scene == "main":
         # Update player position
